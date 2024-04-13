@@ -1,4 +1,4 @@
-extends Reference
+extends RefCounted
 
 class_name LocationWatcher
 
@@ -17,7 +17,7 @@ func _init(geo_api):
 func _make_ready():
 	# request one location and authorize before when neccessary
 	var request = geolocation_api.request_location_autopermission()
-	var location:Location = yield(request,"location_update")
+	var location:Location = await request.location_update
 	
 	# location is null when no location could be found (no permission, no connection)
 	if location == null:
@@ -39,7 +39,7 @@ func _on_location_update(location:Location):
 	emit_signal("location_update",location)
 	
 func _listen_for_error():
-	error = yield(geolocation_api, "error")
+	error = await geolocation_api.error
 	geolocation_api._on_log("** error happend in watcher")
 	# stop watcher on error
 	stop()
